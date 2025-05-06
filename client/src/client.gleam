@@ -1,3 +1,4 @@
+import gleam/float
 import gleam/io
 import gleam/option.{type Option}
 import lustre
@@ -7,11 +8,11 @@ import lustre/element.{type Element}
 import lustre/element/html
 import weather_report.{type WeatherReport, WeatherReport}
 
-type Model {
+pub type Model {
   Model(report: WeatherReport, error: Option(String))
 }
 
-type Msg
+pub type Msg
 
 pub fn main() -> Nil {
   let flags = get_initial_state()
@@ -27,17 +28,24 @@ fn get_initial_state() -> WeatherReport {
   WeatherReport(32.0, 10.0)
 }
 
-fn init(report: WeatherReport) -> #(Model, Effect(Msg)) {
+pub fn init(report: WeatherReport) -> #(Model, Effect(Msg)) {
   let model = Model(report: report, error: option.None)
 
   #(model, effect.none())
 }
 
-fn update(model: Model, _msg: Msg) -> #(Model, Effect(Msg)) {
+pub fn update(model: Model, _msg: Msg) -> #(Model, Effect(Msg)) {
   #(model, effect.none())
 }
 
-fn view(_model: Model) -> Element(Msg) {
+pub fn view(model: Model) -> Element(Msg) {
+  html.div([], [
+    top_bar(),
+    html.div([], [html.text(float.to_string(model.report.temperature))]),
+  ])
+}
+
+pub fn top_bar() -> Element(Msg) {
   html.div([class("p-4 bg-red-500 text-white")], [
     html.h1([class("w-full mx-auto max-w-screen-xl text-4xl font-bold")], [
       html.text("Weather Station"),
