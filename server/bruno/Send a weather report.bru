@@ -1,0 +1,18 @@
+meta {
+  name: Send a weather report
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/weather_report
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "temp": 52.0,
+    "humidity": 10
+  }
+}
