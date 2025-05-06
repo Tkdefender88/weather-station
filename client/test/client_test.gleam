@@ -5,6 +5,7 @@ import gleeunit
 import gleeunit/should
 import lustre/attribute.{class}
 import lustre/element/html
+import view/view
 import weather_report
 
 pub fn main() -> Nil {
@@ -27,7 +28,7 @@ pub fn view_test() {
 }
 
 pub fn top_bar_test() {
-  client.top_bar()
+  view.top_bar()
   |> should.equal(
     html.div([class("p-4 bg-red-500 text-white")], [
       html.h1([class("w-full mx-auto max-w-screen-xl text-4xl font-bold")], [

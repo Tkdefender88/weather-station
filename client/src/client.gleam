@@ -6,13 +6,15 @@ import lustre/attribute.{class}
 import lustre/effect.{type Effect}
 import lustre/element.{type Element}
 import lustre/element/html
+import messages/msgs.{type Msg}
+import view/card
+import view/svgs/svgs
+import view/view
 import weather_report.{type WeatherReport, WeatherReport}
 
 pub type Model {
   Model(report: WeatherReport, error: Option(String))
 }
-
-pub type Msg
 
 pub fn main() -> Nil {
   let flags = get_initial_state()
@@ -39,16 +41,26 @@ pub fn update(model: Model, _msg: Msg) -> #(Model, Effect(Msg)) {
 }
 
 pub fn view(model: Model) -> Element(Msg) {
-  html.div([], [
-    top_bar(),
-    html.div([], [html.text(float.to_string(model.report.temperature))]),
+  html.body([class("bg-gray-100 min-h-screen flex flex-col")], [
+    view.top_bar(),
+    main_content(model),
+    view.footer(),
   ])
 }
 
-pub fn top_bar() -> Element(Msg) {
-  html.div([class("p-4 bg-red-500 text-white")], [
-    html.h1([class("w-full mx-auto max-w-screen-xl text-4xl font-bold")], [
-      html.text("Weather Station"),
+pub fn main_content(model: Model) -> Element(Msg) {
+  html.main([class("container mx-auto p-4 mt-6 flex-grow")], [
+    html.div([class("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")], [
+      card.view_card(
+        float.to_string(model.report.temperature),
+        "Temperature",
+        svgs.svg_temperature_icon(),
+      ),
+      card.view_card(
+        float.to_string(model.report.humidity),
+        "Humidity",
+        svgs.svg_humidity_icon(),
+      ),
     ]),
   ])
 }
