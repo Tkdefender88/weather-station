@@ -1,36 +1,28 @@
-import gleam/bytes_tree
 import gleam/erlang/process
-import gleam/http.{Get, Post}
-import gleam/http/request.{type Request}
-import gleam/http/response.{type Response}
 import gleam/result
-import mist.{type Connection, type ResponseData}
+import mist
 import sqlight
+import weather_station/context
+import weather_station/router
+import wisp
+import wisp/wisp_mist
 
-pub fn main() -> Nil {
+pub fn main() {
   let assert Ok(db) = setup_database()
 
-  let handler = fn(req: Request(Connection)) -> Response(ResponseData) {
-    let path = request.path_segments(req)
-    case req.method, path {
-      Post, ["api", "weather_report"] -> handle_save_weather_report(req, db)
-      Get, [] ->
-        response.new(200)
-        |> response.set_body(mist.Bytes(bytes_tree.from_string("Hello")))
-      _, _ ->
-        response.new(404) |> response.set_body(mist.Bytes(bytes_tree.new()))
-    }
-  }
+  wisp.configure_logger()
+  let secret_key_base = wisp.random_string(64)
+  let ctx = context.Context(db)
 
-  let assert Ok(_) = mist.new(handler) |> mist.port(3000) |> mist.start_http
+  let handler = router.handle_request(_, ctx)
+
+  let assert Ok(_) =
+    wisp_mist.handler(handler, secret_key_base)
+    |> mist.new
+    |> mist.port(8000)
+    |> mist.start_http
+
   process.sleep_forever()
-}
-
-pub fn handle_save_weather_report(
-  _req: Request(Connection),
-  _db: sqlight.Connection,
-) -> Response(ResponseData) {
-  response.new(201) |> response.set_body(mist.Bytes(bytes_tree.new()))
 }
 
 pub fn setup_database() -> Result(sqlight.Connection, sqlight.Error) {
