@@ -1,16 +1,20 @@
 import gleam/float
 import gleam/io
+import gleam/json
 import gleam/option.{type Option}
+import gleam/result
 import lustre
 import lustre/attribute.{class}
 import lustre/effect.{type Effect}
 import lustre/element.{type Element}
 import lustre/element/html
 import messages/msgs.{type Msg}
+import plinth/browser/document
+import plinth/browser/element as plinth_element
 import view/card
 import view/svgs/svgs
 import view/view
-import weather_report.{type WeatherReport, WeatherReport}
+import weather_report.{type WeatherReport}
 
 pub type Model {
   Model(report: WeatherReport, error: Option(String))
@@ -21,13 +25,18 @@ pub fn main() -> Nil {
 
   let app = lustre.application(init, update, view)
   let assert Ok(_) = lustre.start(app, "#app", flags)
-  io.println("Hello from app!")
 
   Nil
 }
 
 fn get_initial_state() -> WeatherReport {
-  WeatherReport(32.0, 10.0)
+  document.query_selector("#model")
+  |> result.map(plinth_element.inner_text)
+  |> result.then(fn(json) {
+    json.parse(json, weather_report.weather_report_decoder())
+    |> result.replace_error(Nil)
+  })
+  |> result.unwrap(weather_report.WeatherReport(32.0, 10.0))
 }
 
 pub fn init(report: WeatherReport) -> #(Model, Effect(Msg)) {

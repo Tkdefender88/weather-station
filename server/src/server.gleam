@@ -12,7 +12,8 @@ pub fn main() {
 
   wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
-  let ctx = context.Context(db)
+  let assert Ok(priv_directory) = wisp.priv_directory("server")
+  let ctx = context.Context(db, priv_directory <> "/static")
 
   let handler = router.handle_request(_, ctx)
 

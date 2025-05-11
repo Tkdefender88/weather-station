@@ -1,6 +1,7 @@
 *.beam
 *.ez
 server/build
+server/priv
 client/build
 client/priv
 shared/build
