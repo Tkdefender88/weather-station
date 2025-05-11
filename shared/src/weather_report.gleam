@@ -11,6 +11,12 @@ pub fn weather_report_decoder() -> decode.Decoder(WeatherReport) {
   decode.success(WeatherReport(temperature:, humidity:))
 }
 
+pub fn weather_report_db_decoder() -> decode.Decoder(WeatherReport) {
+  use temperature <- decode.field(0, decode.float)
+  use humidity <- decode.field(1, decode.float)
+  decode.success(WeatherReport(temperature:, humidity:))
+}
+
 pub fn encode_weather_report(weather_report: WeatherReport) -> json.Json {
   let WeatherReport(temperature:, humidity:) = weather_report
   json.object([

@@ -1,0 +1,11 @@
+meta {
+  name: fetch weather report
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/weather_report
+  body: json
+  auth: none
+}
