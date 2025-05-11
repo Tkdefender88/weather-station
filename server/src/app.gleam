@@ -28,27 +28,15 @@ pub fn main() {
 pub fn setup_database() -> Result(sqlight.Connection, sqlight.Error) {
   use db <- result.try(sqlight.open("weather_station.db"))
 
-  let create_table =
-    "
-  CREATE TABLE IF NOT EXISTS weather_station (
-    name TEXT PRIMARY KEY
-  )
-  "
-
   let create_sensor_data_table =
     "
   CREATE TABLE IF NOT EXISTS weather_report (
-    weather_station TEXT,
     temperature FLOAT,
     humidity FLOAT,
-    created_at datetime default current_timestamp,
-    station_name TEXT NOT NULL,
-    FOREIGN KEY (station_name)
-      REFERENCES weather_station (name)
+    created_at datetime default current_timestamp
   )
   "
 
-  use _ <- result.try(sqlight.exec(create_table, db))
   use _ <- result.try(sqlight.exec(create_sensor_data_table, db))
 
   Ok(db)
