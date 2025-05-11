@@ -5,3 +5,4 @@ client/build
 client/priv
 shared/build
 erl_crash.dump
+*.db
