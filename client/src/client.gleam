@@ -1,5 +1,4 @@
 import gleam/float
-import gleam/io
 import gleam/json
 import gleam/option.{type Option}
 import gleam/result
@@ -50,7 +49,7 @@ pub fn update(model: Model, _msg: Msg) -> #(Model, Effect(Msg)) {
 }
 
 pub fn view(model: Model) -> Element(Msg) {
-  html.body([class("bg-gray-100 min-h-screen flex flex-col")], [
+  html.div([class("bg-gray-100 min-h-screen flex flex-col")], [
     view.top_bar(),
     main_content(model),
     view.footer(),

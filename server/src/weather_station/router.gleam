@@ -1,9 +1,11 @@
+import client
 import gleam/dynamic/decode
 import gleam/http
 import gleam/int
 import gleam/json
 import gleam/list
-import lustre/attribute.{attribute}
+import gleam/option
+import lustre/attribute.{attribute, class}
 import lustre/element
 import lustre/element/html
 import sqlight
@@ -28,9 +30,38 @@ pub fn handle_request(req: Request, ctx: context.Context) -> Response {
   case req.method, wisp.path_segments(req) {
     http.Post, ["api", "weather_report"] -> handle_post_report(req, ctx)
     http.Get, ["api", "weather_report"] -> handle_get_report(ctx)
-    http.Get, _ -> serve_index(ctx)
+    http.Get, [] -> serve_index(ctx)
     _, _ -> wisp.not_found()
   }
+}
+
+fn page_scaffold(content: element.Element(a), initial_model: String) {
+  html.html([attribute("lang", "en")], [
+    html.head([], [
+      html.meta([attribute("charset", "UTF-8")]),
+      html.meta([
+        attribute("content", "width=device-width, initial-scale=1.0"),
+        attribute.name("viewport"),
+      ]),
+      html.link([
+        attribute.href("/static/client.min.css"),
+        attribute.type_("text/css"),
+        attribute.rel("stylesheet"),
+      ]),
+      html.title([], "Weather Station"),
+      html.script(
+        [attribute.id("model"), attribute.type_("application/json")],
+        initial_model,
+      ),
+      html.script(
+        [attribute.src("/static/client.min.mjs"), attribute.type_("module")],
+        "",
+      ),
+    ]),
+    html.body([], [
+      html.div([attribute.id("app")], [content]),
+    ]),
+  ])
 }
 
 pub fn serve_index(ctx: context.Context) -> Response {
@@ -42,34 +73,14 @@ pub fn serve_index(ctx: context.Context) -> Response {
       }
     Error(_) -> weather_report.WeatherReport(32.0, 0.0)
   }
+  let hydration_state =
+    report
+    |> weather_report.encode_weather_report
+    |> json.to_string
+  let model = client.Model(report, option.None)
 
-  let html =
-    html.html([attribute("lang", "en")], [
-      html.head([], [
-        html.meta([attribute("charset", "UTF-8")]),
-        html.meta([
-          attribute("content", "width=device-width, initial-scale=1.0"),
-          attribute.name("viewport"),
-        ]),
-        html.link([
-          attribute.href("/static/client.min.css"),
-          attribute.type_("text/css"),
-          attribute.rel("stylesheet"),
-        ]),
-        html.title([], "Weather Station"),
-        html.script(
-          [attribute.id("model"), attribute.type_("application/json")],
-          json.to_string(weather_report.encode_weather_report(report)),
-        ),
-        html.script(
-          [attribute.src("/static/client.min.mjs"), attribute.type_("module")],
-          "",
-        ),
-      ]),
-      html.body([], [html.div([attribute.id("app")], [])]),
-    ])
-
-  html
+  client.view(model)
+  |> page_scaffold(hydration_state)
   |> element.to_document_string_tree
   |> wisp.html_response(200)
 }
