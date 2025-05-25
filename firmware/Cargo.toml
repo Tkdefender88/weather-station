@@ -1,0 +1,21 @@
+[package]
+name = "firmware"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+panic-halt = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f405", "rt"] }
+
+[[bin]]
+name = "firmware"
+test = false
+bench = false
+
+[profile.release]
+debug = true
+lto = true
